@@ -1,0 +1,33 @@
+import styled from 'styled-components'
+import { Card } from '../../../design-system'
+import { Link } from 'react-router-dom'
+
+export const ResourcesListPageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  gap: ${({ theme }) => theme.spacing.sm};
+`
+
+export const ResourcesListPageTitle = styled.h1`
+  font-family: ${({ theme }) => theme.typography.heading};
+  font-size: 2rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.inkStrong};
+  margin: ${({ theme }) => theme.spacing.lg};
+  text-align: center;
+`
+
+export const ResourcesListPageCard = styled(Card)`
+  width: 100%;
+  max-width: 400px;
+`
+
+export const ResourcesListPageLink = styled(Link)`
+  color: ${({ theme }) => theme.colors.ink};
+  width: 100%;
+  max-width: 400px;
+`
