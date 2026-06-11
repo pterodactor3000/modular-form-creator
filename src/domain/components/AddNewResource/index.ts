@@ -1,0 +1,1 @@
+export { AddNewResource } from './AddNewResource'

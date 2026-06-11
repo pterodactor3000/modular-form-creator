@@ -7,7 +7,7 @@ export type Pagination = {
   totalPages: number
 }
 
-export type ResourcesListPageProps = {
-  resources: ResourceProps[]
+export type ResourcesList = {
+  items: ResourceProps[]
   pagination: Pagination
 }

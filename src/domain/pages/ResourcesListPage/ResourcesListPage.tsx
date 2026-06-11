@@ -1,27 +1,50 @@
+import { useState } from 'react'
+import { useResources } from '../../contexts/ResourcesContext'
 import {
   ResourcesListPageContainer,
   ResourcesListPageTitle,
-  ResourcesListPageCard,
-  ResourcesListPageLink,
 } from './ResourcesListPage.styles'
-import type { ResourcesListPageProps } from './ResourceListPage.types'
+import { AddNewResource } from '../../components/AddNewResource'
+import { ResourceCard } from '../../components/ResourceCard/ResourceCard'
 
-export const ResourcesListPage = (args: ResourcesListPageProps) => {
-  const { resources, pagination } = args
+export const ResourcesListPage = () => {
+  const { resourcesList, addResource, removeResource } = useResources()
+  const [newResourceName, setNewResourceName] = useState('')
+
+  const resourceNamePattern = /^[a-zA-Z0-9\s-]+$/
+  const newResourceNameError =
+    newResourceName.length > 0 && !resourceNamePattern.test(newResourceName)
+      ? 'Resource name can contain only letters, numbers, spaces, and hyphens'
+      : ''
+
+  const handleRemoveResource = (resourceId: number) => {
+    removeResource(resourceId)
+  }
+
+  const handleAddResource = (resourceName: string) => {
+    addResource(resourceName)
+    setNewResourceName('')
+  }
 
   return (
     <>
       <ResourcesListPageTitle>Resources</ResourcesListPageTitle>
       <ResourcesListPageContainer>
-        {resources
-          ? resources.map((resource) => (
-              <ResourcesListPageLink to={`/resources/${resource.resourceId}`}>
-                <ResourcesListPageCard>
-                  <h2>{resource.name}</h2>
-                </ResourcesListPageCard>
-              </ResourcesListPageLink>
+        {resourcesList.items
+          ? resourcesList.items.map((resource) => (
+              <ResourceCard
+                key={resource.resourceId}
+                resource={resource}
+                handleRemoveResource={handleRemoveResource}
+              />
             ))
           : null}
+        <AddNewResource
+          newResourceName={newResourceName}
+          setNewResourceName={setNewResourceName}
+          newResourceNameError={newResourceNameError}
+          handleAddResource={handleAddResource}
+        />
       </ResourcesListPageContainer>
     </>
   )

@@ -4,7 +4,8 @@ import { ProjectDetails } from '../ProjectDetails'
 import type { ResourceProps } from './Resource.types'
 
 export const Resource = (props: ResourceProps) => {
-  const { resourceId, name, status, basicInfo, projectDetails } = props
+  const { name, status, basicInfo, projectDetails } = props
+
   return (
     <Card>
       <h2>{name}</h2>

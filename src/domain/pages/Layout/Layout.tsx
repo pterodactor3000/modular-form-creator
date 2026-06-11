@@ -1,15 +1,10 @@
-import { Outlet, useNavigate } from 'react-router-dom'
-import { Button } from '../../../design-system'
+import { Outlet } from 'react-router-dom'
+import { ResourceLayoutContainer } from './Layout.styles'
 
 export const Layout = () => {
-  const navigate = useNavigate()
-
   return (
-    <div>
-      <Button variant="ghost" onClick={() => navigate('/resources')}>
-        ← Back to resources
-      </Button>
+    <ResourceLayoutContainer>
       <Outlet />
-    </div>
+    </ResourceLayoutContainer>
   )
 }

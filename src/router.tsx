@@ -4,22 +4,24 @@ import { ResourcesListPage } from './domain/pages/ResourcesListPage'
 import { ResourceOverviewPage } from './domain/pages/ResourceOverviewPage'
 
 import App from './App'
-import { Layout } from './domain/pages/Layout/Layout'
+import { Layout, ResourceBasicInfoPage, ResourceProjectDetailsPage } from './domain/pages'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
   },
-  { 
-    path: '/resources', element: <ResourcesListPage />,
+  {
+    path: '/resources',
+    element: <ResourcesListPage />,
   },
-  { 
-    path: '/resources/:resourceId', element: <Layout />,
+  {
+    path: '/resources/:resourceId',
+    element: <Layout />,
     children: [
-      { index: true, element: <ResourceOverviewPage /> },
-      // { path: ':resourceId/basic-info', element: <ResourceBasicInfoPage /> },
-      // { path: ':resourceId/project-details', element: <ResourceProjectDetailsPage /> },
-    ]
-   },
+      { path: 'details', element: <ResourceOverviewPage /> },
+      { path: 'basic-info', element: <ResourceBasicInfoPage /> },
+      { path: 'project-details', element: <ResourceProjectDetailsPage /> },
+    ],
+  },
 ])

@@ -1,15 +1,15 @@
 import styled from 'styled-components'
 
-export const ResourcesListPageContainer = styled.div`
+export const ResourceOverviewContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   gap: ${({ theme }) => theme.spacing.sm};
 `
 
-export const ResourcesListPageTitle = styled.h1`
+export const ResourceOverviewTitle = styled.h2`
   font-family: ${({ theme }) => theme.typography.heading};
   font-size: 2rem;
   font-weight: 600;
