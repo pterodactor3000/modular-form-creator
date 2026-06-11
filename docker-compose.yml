@@ -17,6 +17,17 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+  frontend:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    container_name: modular-form-creator-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: "http://backend:5001"
+    depends_on:
+      - backend
 
 volumes:
   mongo_data:
