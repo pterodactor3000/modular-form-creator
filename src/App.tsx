@@ -1,11 +1,6 @@
 import styled from 'styled-components'
-
 function App() {
-  return (
-    <AppShell>
-      <Message>Good luck!</Message>
-    </AppShell>
-  )
+  return <AppShell></AppShell>
 }
 
 const AppShell = styled.div`
@@ -13,11 +8,7 @@ const AppShell = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`
-
-const Message = styled.h1`
-  font-size: 2.5rem;
-  color: ${({ theme }) => theme.colors.inkStrong};
+  flex-direction: column;
 `
 
 export default App

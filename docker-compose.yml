@@ -17,6 +17,27 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+  frontend:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    container_name: modular-form-creator-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: "http://backend:5001"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - ./tsconfig.node.json:/app/tsconfig.node.json
+      - /app/node_modules
+    depends_on:
+      - backend
 
 volumes:
   mongo_data:

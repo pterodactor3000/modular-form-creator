@@ -1,15 +1,20 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from 'styled-components'
-import App from './App'
+import { RouterProvider } from 'react-router-dom'
+
 import { GlobalStyles } from './design-system/theme/GlobalStyles'
 import { theme } from './design-system/theme/theme'
+import { router } from './router'
+import { ResourcesProvider } from './domain/providers/ResourcesProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <GlobalStyles />
-      <App />
+      <ResourcesProvider>
+        <GlobalStyles />
+        <RouterProvider router={router} />
+      </ResourcesProvider>
     </ThemeProvider>
   </StrictMode>,
 )

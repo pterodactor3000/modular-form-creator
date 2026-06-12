@@ -1,0 +1,5 @@
+export { ResourcesListPage } from './ResourcesListPage'
+export { ResourceOverviewPage } from './ResourceOverviewPage'
+export { ResourceBasicInfoPage } from './ResourceBasicInfoPage'
+export { ResourceProjectDetailsPage } from './ResourceProjectDetailsPage'
+export { Layout } from './Layout'
