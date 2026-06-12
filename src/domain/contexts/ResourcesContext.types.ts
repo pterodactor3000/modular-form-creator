@@ -18,4 +18,10 @@ export type ResourcesContextType = {
   activeResourceProjectDetailsFilled: boolean
   updateActiveResourceId: (resourceId: number) => void
   updateActiveResourceModulesFilled: (activeResource: ResourceProps) => void
+  persistResource: (resource: ResourceProps) => void
+  getPersistedResource: (resourceId: number) => ResourceProps | null
+  removePersistedResource: (resourceId: number) => void
+  updateResource: (resourceId: number) => void
+  isResourcePersisted: (resourceId: number) => boolean
+  isActiveResourceCompleted: boolean
 }

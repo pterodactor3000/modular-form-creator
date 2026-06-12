@@ -27,6 +27,12 @@ const ResourcesContext = createContext<ResourcesContextType>({
   activeResourceProjectDetailsFilled: false,
   updateActiveResourceId: () => {},
   updateActiveResourceModulesFilled: () => {},
+  persistResource: () => {},
+  getPersistedResource: () => null,
+  removePersistedResource: () => {},
+  updateResource: () => {},
+  isResourcePersisted: () => false,
+  isActiveResourceCompleted: false,
 })
 
 const useResources = () => useContext(ResourcesContext)

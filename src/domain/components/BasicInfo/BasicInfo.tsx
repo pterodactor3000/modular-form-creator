@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import type { BasicInfoProps } from './BasicInfo.types'
 import { Button, Input, Select } from '../../../design-system'
@@ -8,13 +8,14 @@ import { useResources } from '../../contexts/ResourcesContext'
 
 export const BasicInfo = (props: BasicInfoProps) => {
   const navigate = useNavigate()
-  const { editBasicInfo, error, activeResourceId } = useResources()
+  const { resourceId } = useParams<{ resourceId: string }>()
+  const { editBasicInfo, error } = useResources()
 
   const { resourceName, owner, email, description, priority } = props
 
   const [ownerValue, setOwnerValue] = useState(owner)
   const [emailValue, setEmailValue] = useState(email)
-  const [priorityValue, setPriorityValue] = useState(priority)
+  const [priorityValue, setPriorityValue] = useState(priority ? priority : 'low')
   const [descriptionValue, setDescriptionValue] = useState(description)
 
   const [dirty, setDirty] = useState(false)
@@ -26,18 +27,17 @@ export const BasicInfo = (props: BasicInfoProps) => {
   ]
 
   const handleSave = () => {
-    editBasicInfo(activeResourceId ?? 0, {
-      resourceId: activeResourceId ?? 0,
+    editBasicInfo(parseInt(resourceId ?? ''), {
+      resourceId: parseInt(resourceId ?? ''),
       resourceName,
       owner: ownerValue,
       email: emailValue,
       priority: priorityValue,
       description: descriptionValue,
     })
-
     if (!error) {
       setDirty(false)
-      navigate(`/resources/${activeResourceId}/details`)
+      navigate(resourceId ? `/resources/${resourceId}/details` : '/resources')
     }
   }
 
@@ -99,7 +99,7 @@ export const BasicInfo = (props: BasicInfoProps) => {
         />
       </BasicItem>
       <ActionButtonsContainer>
-        <Link to={`/resources/${activeResourceId}/details`}>
+        <Link to={resourceId ? `/resources/${resourceId}/details` : '/resources'}>
           <Button variant="ghost">Cancel</Button>
         </Link>
         <Button disabled={!dirty} onClick={handleSave}>

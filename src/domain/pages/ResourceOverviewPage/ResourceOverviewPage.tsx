@@ -17,14 +17,25 @@ export const ResourceOverviewPage = () => {
     activeResourceProjectDetailsFilled,
     resourcesList,
     updateActiveResourceModulesFilled,
+    updateResource,
+    isResourcePersisted,
+    getPersistedResource,
+    error,
   } = useResources()
 
-  const activeResource = resourcesList.items.find(
-    (resource) => resource.resourceId === parseInt(resourceId ?? ''),
-  )
+  const activeResource = isResourcePersisted(parseInt(resourceId ?? ''))
+    ? getPersistedResource(parseInt(resourceId ?? ''))
+    : resourcesList.items.find(
+        (resource) => resource.resourceId === parseInt(resourceId ?? ''),
+      )
 
   const handleProvisionResource = () => {
     provisionResource(parseInt(resourceId ?? ''))
+    navigate('/resources')
+  }
+
+  const handleUpdateResource = () => {
+    updateResource(parseInt(resourceId ?? ''))
     navigate('/resources')
   }
 
@@ -47,6 +58,7 @@ export const ResourceOverviewPage = () => {
       {activeResource ? (
         <>
           <ResourceTitle>Resource Details</ResourceTitle>
+          {error && <div style={{ color: 'red' }}>{error}</div>}
           <ResourceDetails {...activeResource} />
         </>
       ) : (
@@ -63,24 +75,35 @@ export const ResourceOverviewPage = () => {
         >
           Delete Resource
         </Button>
-        <Button
-          disabled={
-            !activeResourceBasicInfoFilled ||
-            !activeResourceProjectDetailsFilled ||
-            activeResource?.status === 'completed'
-          }
-          variant="primary"
-          onClick={handleProvisionResource}
-          title={
-            !activeResourceBasicInfoFilled || !activeResourceProjectDetailsFilled
-              ? 'You need to fill in the basic info and project details first'
-              : activeResource?.status === 'completed'
-                ? 'Resource is already completed, cannot provision again'
+        {activeResource?.status === 'draft' ? (
+          <Button
+            disabled={
+              !activeResourceBasicInfoFilled || !activeResourceProjectDetailsFilled
+            }
+            variant="primary"
+            onClick={handleProvisionResource}
+            title={
+              !activeResourceBasicInfoFilled || !activeResourceProjectDetailsFilled
+                ? 'You need to fill in the basic info and project details first'
                 : ''
-          }
-        >
-          Provision Resource
-        </Button>
+            }
+          >
+            Provision Resource
+          </Button>
+        ) : (
+          <Button
+            disabled={!isResourcePersisted(parseInt(resourceId ?? ''))}
+            variant="primary"
+            onClick={handleUpdateResource}
+            title={
+              !isResourcePersisted(parseInt(resourceId ?? ''))
+                ? 'Resource is not changed, cannot update'
+                : 'Update resource'
+            }
+          >
+            Update
+          </Button>
+        )}
       </ActionButtonsContainer>
     </>
   )

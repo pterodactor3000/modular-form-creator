@@ -8,6 +8,13 @@ import type { BasicInfoProps } from '../components/BasicInfo/BasicInfo.types'
 import type { ProjectDetailsProps } from '../components/ProjectDetails/ProjectDetails.types'
 import type { ResourceProps } from '../components/Resource/Resource.types'
 
+import {
+  clearSessionStorage,
+  getSessionStorageResource,
+  removeSessionStorageResource,
+  setSessionStorageResource,
+} from '../helpers/sessionStorage.helper'
+
 export const ResourcesProvider = ({ children }: { children: React.ReactNode }) => {
   const [resourcesList, setResourcesList] = useState<ResourcesList>(initialResourcesList)
   const [newResourceNameError, setNewResourceNameError] = useState('')
@@ -18,6 +25,7 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
     useState(false)
   const [activeResourceProjectDetailsFilled, setActiveResourceProjectDetailsFilled] =
     useState(false)
+  const [isActiveResourceCompleted, setIsActiveResourceCompleted] = useState(false)
 
   const getResourcesList = (page: number, pageSize: number) => {
     axios
@@ -45,24 +53,36 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
 
   const editBasicInfo = (resourceId: number, basicInfo: BasicInfoProps) => {
     setError(undefined)
-    axios
-      .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/basic-info`, {
-        resourceName: basicInfo.resourceName,
-        owner: basicInfo.owner,
-        email: basicInfo.email,
-        description: basicInfo.description,
-        priority: basicInfo.priority,
+
+    if (isActiveResourceCompleted) {
+      const resource = resourcesList.items.find((item) => item.resourceId === resourceId)
+
+      if (!resource) return
+
+      persistResource({
+        ...resource,
+        basicInfo: basicInfo,
       })
-      .then((response) => {
-        setResourcesList({
-          ...resourcesList,
-          items: resourcesList.items.map((item) =>
-            item.resourceId === resourceId ? response.data : item,
-          ),
+    } else {
+      axios
+        .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/basic-info`, {
+          resourceName: basicInfo.resourceName,
+          owner: basicInfo.owner,
+          email: basicInfo.email,
+          description: basicInfo.description,
+          priority: basicInfo.priority,
         })
-        updateActiveResourceModulesFilled(response.data)
-      })
-      .catch((error) => setError(error.response.data.message))
+        .then((response) => {
+          setResourcesList({
+            ...resourcesList,
+            items: resourcesList.items.map((item) =>
+              item.resourceId === resourceId ? response.data : item,
+            ),
+          })
+          updateActiveResourceModulesFilled(response.data)
+        })
+        .catch((error) => setError(error.response.data.message))
+    }
   }
 
   const editProjectDetails = (
@@ -70,23 +90,34 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
     projectDetails: ProjectDetailsProps,
   ) => {
     setError(undefined)
-    axios
-      .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/project-details`, {
-        projectName: projectDetails.projectName,
-        budget: projectDetails.budget,
-        category: projectDetails.category,
-        options: projectDetails.options,
+    if (isActiveResourceCompleted) {
+      const resource = resourcesList.items.find((item) => item.resourceId === resourceId)
+
+      if (!resource) return
+
+      persistResource({
+        ...resource,
+        projectDetails: projectDetails,
       })
-      .then((response) => {
-        setResourcesList({
-          ...resourcesList,
-          items: resourcesList.items.map((item) =>
-            item.resourceId === resourceId ? response.data : item,
-          ),
+    } else {
+      axios
+        .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/project-details`, {
+          projectName: projectDetails.projectName,
+          budget: projectDetails.budget,
+          category: projectDetails.category,
+          options: projectDetails.options,
         })
-        updateActiveResourceModulesFilled(response.data)
-      })
-      .catch((error) => setError(error.response.data.message))
+        .then((response) => {
+          setResourcesList({
+            ...resourcesList,
+            items: resourcesList.items.map((item) =>
+              item.resourceId === resourceId ? response.data : item,
+            ),
+          })
+          updateActiveResourceModulesFilled(response.data)
+        })
+        .catch((error) => setError(error.response.data.message))
+    }
   }
 
   const provisionResource = (resourceId: number) => {
@@ -100,11 +131,21 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
             item.resourceId === resourceId ? response.data : item,
           ),
         })
+        setIsActiveResourceCompleted(response.data.status === 'completed')
       })
       .catch((error) => {
         window.alert(error.response.data.message)
         setError(error.response.data.message)
       })
+  }
+
+  const updateResource = (resourceId: number) => {
+    axios
+      .put(`${RESOURCES_API_BASE_URL}/${resourceId}`, getPersistedResource(resourceId))
+      .then((response) => {
+        removePersistedResource(response.data.resourceId)
+      })
+      .catch((error) => setError(error.response.data.message))
   }
 
   const handlePageChange = (page: number) => {
@@ -122,6 +163,7 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
     if (!activeResource) return
 
     setActiveResourceId(resourceId)
+    setIsActiveResourceCompleted(activeResource.status === 'completed')
     updateActiveResourceModulesFilled(activeResource)
   }
 
@@ -140,7 +182,24 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
     )
   }
 
+  const persistResource = (resource: ResourceProps) => {
+    setSessionStorageResource(resource)
+  }
+
+  const getPersistedResource = (resourceId: number) => {
+    return getSessionStorageResource(resourceId)
+  }
+
+  const removePersistedResource = (resourceId: number) => {
+    removeSessionStorageResource(resourceId)
+  }
+
+  const isResourcePersisted = (resourceId: number) => {
+    return getSessionStorageResource(resourceId) !== null
+  }
+
   useEffect(() => {
+    clearSessionStorage()
     getResourcesList(1, 10)
   }, [])
 
@@ -161,6 +220,12 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
         activeResourceProjectDetailsFilled,
         updateActiveResourceId,
         updateActiveResourceModulesFilled,
+        persistResource,
+        getPersistedResource,
+        removePersistedResource,
+        isResourcePersisted,
+        updateResource,
+        isActiveResourceCompleted,
       }}
     >
       {children}

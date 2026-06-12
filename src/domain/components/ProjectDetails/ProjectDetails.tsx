@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useState } from 'react'
 
 import { Button, CheckboxGroup, Input, Select } from '../../../design-system'
@@ -9,13 +9,14 @@ import { useResources } from '../../contexts/ResourcesContext'
 
 export const ProjectDetails = (props: ProjectDetailsProps) => {
   const navigate = useNavigate()
-  const { editProjectDetails, error, activeResourceId } = useResources()
+  const { resourceId } = useParams<{ resourceId: string }>()
+  const { editProjectDetails, error } = useResources()
 
   const { projectName, budget, category, options } = props
 
   const [projectNameValue, setProjectNameValue] = useState(projectName)
   const [budgetValue, setBudgetValue] = useState(budget)
-  const [categoryValue, setCategoryValue] = useState(category)
+  const [categoryValue, setCategoryValue] = useState(category ? category : 'internal')
   const [optionsValue, setOptionsValue] = useState(options)
 
   const [dirty, setDirty] = useState(false)
@@ -35,7 +36,7 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
   ]
 
   const handleSave = () => {
-    editProjectDetails(activeResourceId ?? 0, {
+    editProjectDetails(parseInt(resourceId ?? ''), {
       projectName: projectNameValue,
       budget: budgetValue,
       category: categoryValue,
@@ -44,7 +45,7 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
 
     if (!error) {
       setDirty(false)
-      navigate(`/resources/${activeResourceId}/details`)
+      navigate(resourceId ? `/resources/${resourceId}/details` : '/resources')
     }
   }
 
@@ -106,7 +107,7 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
         />
       </BasicItem>
       <ActionButtonsContainer>
-        <Link to={`/resources/${activeResourceId}/details`}>
+        <Link to={resourceId ? `/resources/${resourceId}/details` : '/resources'}>
           <Button variant="ghost">Cancel</Button>
         </Link>
         <Button disabled={!dirty} onClick={handleSave}>
