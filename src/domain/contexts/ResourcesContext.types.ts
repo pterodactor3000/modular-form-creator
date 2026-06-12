@@ -11,6 +11,11 @@ export type ResourcesContextType = {
   removeResource: (resourceId: number) => void
   editBasicInfo: (resourceId: number, basicInfo: BasicInfoProps) => void
   editProjectDetails: (resourceId: number, projectDetails: ProjectDetailsProps) => void
-  getResourceById: (resourceId: number) => ResourceProps | null
   provisionResource: (resourceId: number) => void
+  handlePageChange: (page: number) => void
+  activeResourceId: number | null
+  activeResourceBasicInfoFilled: boolean
+  activeResourceProjectDetailsFilled: boolean
+  updateActiveResourceId: (resourceId: number) => void
+  updateActiveResourceModulesFilled: (activeResource: ResourceProps) => void
 }

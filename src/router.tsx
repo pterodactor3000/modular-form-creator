@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, redirect } from 'react-router-dom'
 
 import { ResourcesListPage } from './domain/pages/ResourcesListPage'
 import { ResourceOverviewPage } from './domain/pages/ResourceOverviewPage'
@@ -10,6 +10,9 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    loader: () => {
+      return redirect('/resources')
+    },
   },
   {
     path: '/resources',

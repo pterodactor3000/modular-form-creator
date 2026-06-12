@@ -5,8 +5,11 @@ import {
   ActionButtonsContainer,
   DefaultStyledCard,
 } from '../../pages/Layout/Layout.styles'
+import { useResources } from '../../contexts/ResourcesContext'
 
 export const ResourceDetails = (resource: ResourceProps) => {
+  const { activeResourceBasicInfoFilled } = useResources()
+
   return (
     <>
       <DefaultStyledCard variant="outline">
@@ -64,7 +67,17 @@ export const ResourceDetails = (resource: ResourceProps) => {
 
         <ActionButtonsContainer>
           <ResourceDetailsLink to={`/resources/${resource.resourceId}/project-details`}>
-            <Button variant="ghost">Edit Project Details</Button>
+            <Button
+              variant="ghost"
+              title={
+                !activeResourceBasicInfoFilled
+                  ? 'You need to fill in the basic info first'
+                  : ''
+              }
+              disabled={!activeResourceBasicInfoFilled}
+            >
+              Edit Project Details
+            </Button>
           </ResourceDetailsLink>
         </ActionButtonsContainer>
       </DefaultStyledCard>

@@ -1,13 +1,6 @@
 import styled from 'styled-components'
-import { ThankYou } from './domain/components/ThankYou'
-
 function App() {
-  return (
-    <AppShell>
-      <Message>Good luck!</Message>
-      <ThankYou />
-    </AppShell>
-  )
+  return <AppShell></AppShell>
 }
 
 const AppShell = styled.div`
@@ -16,11 +9,6 @@ const AppShell = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-`
-
-const Message = styled.h1`
-  font-size: 2.5rem;
-  color: ${({ theme }) => theme.colors.inkStrong};
 `
 
 export default App

@@ -6,45 +6,45 @@ import { ResourcesContext, initialResourcesList } from '../contexts/ResourcesCon
 import { RESOURCES_API_BASE_URL } from './ResourcesProvider.constants'
 import type { BasicInfoProps } from '../components/BasicInfo/BasicInfo.types'
 import type { ProjectDetailsProps } from '../components/ProjectDetails/ProjectDetails.types'
+import type { ResourceProps } from '../components/Resource/Resource.types'
 
 export const ResourcesProvider = ({ children }: { children: React.ReactNode }) => {
   const [resourcesList, setResourcesList] = useState<ResourcesList>(initialResourcesList)
   const [newResourceNameError, setNewResourceNameError] = useState('')
   const [error, setError] = useState<string | undefined>(undefined)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [activeResourceId, setActiveResourceId] = useState<number | null>(null)
+  const [activeResourceBasicInfoFilled, setActiveResourceBasicInfoFilled] =
+    useState(false)
+  const [activeResourceProjectDetailsFilled, setActiveResourceProjectDetailsFilled] =
+    useState(false)
 
-  const getResourceById = (resourceId: number) => {
-    return (
-      resourcesList.items.find((resource) => resource.resourceId === resourceId) ?? null
-    )
+  const getResourcesList = (page: number, pageSize: number) => {
+    axios
+      .get(RESOURCES_API_BASE_URL, { params: { page, pageSize } })
+      .then((response) => setResourcesList(response.data))
+      .catch((error) => setError(error.response.data.message))
   }
 
   const addResource = (resourceName: string) => {
     axios
       .post(RESOURCES_API_BASE_URL, { resourceName })
-      .then((response) =>
-        setResourcesList({
-          ...resourcesList,
-          items: [...resourcesList.items, response.data],
-        }),
-      )
+      .then(() => getResourcesList(currentPage, 10))
       .catch((error) => setNewResourceNameError(error.response.data.message))
   }
 
   const removeResource = (resourceId: number) => {
+    const confirmed = confirm('Are you sure you want to remove this resource?')
+    if (!confirmed) return
+
     axios
       .delete(`${RESOURCES_API_BASE_URL}/${resourceId}`)
-      .then((response) =>
-        setResourcesList({
-          ...resourcesList,
-          items: resourcesList.items.filter(
-            (item) => item.resourceId !== response.data.resourceId,
-          ),
-        }),
-      )
+      .then(() => getResourcesList(currentPage, 10))
       .catch((error) => console.error(error))
   }
 
   const editBasicInfo = (resourceId: number, basicInfo: BasicInfoProps) => {
+    setError(undefined)
     axios
       .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/basic-info`, {
         resourceName: basicInfo.resourceName,
@@ -53,14 +53,15 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
         description: basicInfo.description,
         priority: basicInfo.priority,
       })
-      .then((response) =>
+      .then((response) => {
         setResourcesList({
           ...resourcesList,
           items: resourcesList.items.map((item) =>
             item.resourceId === resourceId ? response.data : item,
           ),
-        }),
-      )
+        })
+        updateActiveResourceModulesFilled(response.data)
+      })
       .catch((error) => setError(error.response.data.message))
   }
 
@@ -68,6 +69,7 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
     resourceId: number,
     projectDetails: ProjectDetailsProps,
   ) => {
+    setError(undefined)
     axios
       .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/project-details`, {
         projectName: projectDetails.projectName,
@@ -75,26 +77,71 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
         category: projectDetails.category,
         options: projectDetails.options,
       })
-      .then((response) =>
+      .then((response) => {
         setResourcesList({
           ...resourcesList,
           items: resourcesList.items.map((item) =>
             item.resourceId === resourceId ? response.data : item,
           ),
-        }),
-      )
+        })
+        updateActiveResourceModulesFilled(response.data)
+      })
       .catch((error) => setError(error.response.data.message))
   }
 
   const provisionResource = (resourceId: number) => {
-    console.log('provision resource', resourceId)
+    setError(undefined)
+    axios
+      .patch(`${RESOURCES_API_BASE_URL}/${resourceId}/provisioning`)
+      .then((response) => {
+        setResourcesList({
+          ...resourcesList,
+          items: resourcesList.items.map((item) =>
+            item.resourceId === resourceId ? response.data : item,
+          ),
+        })
+      })
+      .catch((error) => {
+        window.alert(error.response.data.message)
+        setError(error.response.data.message)
+      })
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    getResourcesList(page, 10)
+  }
+
+  const updateActiveResourceId = (resourceId: number) => {
+    if (!resourceId) return
+
+    const activeResource = resourcesList.items.find(
+      (resource) => resource.resourceId === resourceId,
+    )
+
+    if (!activeResource) return
+
+    setActiveResourceId(resourceId)
+    updateActiveResourceModulesFilled(activeResource)
+  }
+
+  const updateActiveResourceModulesFilled = (activeResource: ResourceProps) => {
+    setActiveResourceBasicInfoFilled(
+      activeResource.basicInfo.owner !== '' &&
+        activeResource.basicInfo.email !== '' &&
+        activeResource.basicInfo.priority !== '' &&
+        activeResource.basicInfo.description !== '',
+    )
+    setActiveResourceProjectDetailsFilled(
+      activeResource.projectDetails.projectName !== '' &&
+        activeResource.projectDetails.budget !== '' &&
+        activeResource.projectDetails.category !== '' &&
+        activeResource.projectDetails.options.length > 0,
+    )
   }
 
   useEffect(() => {
-    axios
-      .get(RESOURCES_API_BASE_URL)
-      .then((response) => setResourcesList(response.data))
-      .catch((error) => console.error(error))
+    getResourcesList(1, 10)
   }, [])
 
   return (
@@ -107,8 +154,13 @@ export const ResourcesProvider = ({ children }: { children: React.ReactNode }) =
         editBasicInfo,
         editProjectDetails,
         newResourceNameError,
-        getResourceById,
         provisionResource,
+        handlePageChange,
+        activeResourceId,
+        activeResourceBasicInfoFilled,
+        activeResourceProjectDetailsFilled,
+        updateActiveResourceId,
+        updateActiveResourceModulesFilled,
       }}
     >
       {children}

@@ -1,4 +1,3 @@
-// ResourcesContext.ts
 import { createContext, useContext } from 'react'
 import type { ResourcesList } from '../pages/ResourcesListPage/ResourcesListPage.types'
 import type { ResourcesContextType } from './ResourcesContext.types'
@@ -19,12 +18,15 @@ const ResourcesContext = createContext<ResourcesContextType>({
   removeResource: () => {},
   editBasicInfo: () => {},
   editProjectDetails: () => {},
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getResourceById: (resourceId: number) => null,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  provisionResource: (resourceId: number) => {},
+  provisionResource: () => {},
+  handlePageChange: () => {},
   newResourceNameError: '',
   error: undefined,
+  activeResourceId: null,
+  activeResourceBasicInfoFilled: false,
+  activeResourceProjectDetailsFilled: false,
+  updateActiveResourceId: () => {},
+  updateActiveResourceModulesFilled: () => {},
 })
 
 const useResources = () => useContext(ResourcesContext)

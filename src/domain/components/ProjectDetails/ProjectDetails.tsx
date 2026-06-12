@@ -1,22 +1,24 @@
-import { Link } from 'react-router-dom'
-import { useParams } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 
-import { Button, CheckboxGroup, Input } from '../../../design-system'
+import { Button, CheckboxGroup, Input, Select } from '../../../design-system'
 import { ActionButtonsContainer } from '../../pages/Layout'
 import { BasicItem } from '../../pages/Layout/Layout.styles'
 import type { ProjectDetailsProps } from './ProjectDetails.types'
 import { useResources } from '../../contexts/ResourcesContext'
 
 export const ProjectDetails = (props: ProjectDetailsProps) => {
-  const { resourceId } = useParams<{ resourceId: string }>()
-  const { editProjectDetails, error } = useResources()
+  const navigate = useNavigate()
+  const { editProjectDetails, error, activeResourceId } = useResources()
 
   const { projectName, budget, category, options } = props
+
   const [projectNameValue, setProjectNameValue] = useState(projectName)
   const [budgetValue, setBudgetValue] = useState(budget)
   const [categoryValue, setCategoryValue] = useState(category)
   const [optionsValue, setOptionsValue] = useState(options)
+
+  const [dirty, setDirty] = useState(false)
 
   const checkboxOptions = [
     { value: 'FE devs', label: 'FE devs' },
@@ -26,14 +28,33 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
     { value: 'Product Owner', label: 'Product Owner' },
   ]
 
-  const [dirty, setDirty] = useState(false)
+  const categoryOptions = [
+    { value: 'internal', label: 'Internal' },
+    { value: 'external', label: 'External' },
+    { value: 'vendor', label: 'Vendor' },
+  ]
+
+  const handleSave = () => {
+    editProjectDetails(activeResourceId ?? 0, {
+      projectName: projectNameValue,
+      budget: budgetValue,
+      category: categoryValue,
+      options: optionsValue,
+    })
+
+    if (!error) {
+      setDirty(false)
+      navigate(`/resources/${activeResourceId}/details`)
+    }
+  }
 
   return (
     <>
       <BasicItem>
         <b>Project Name:</b>
         <Input
-          value={projectName}
+          placeholder="Enter project name"
+          value={projectNameValue}
           onChange={(e) => {
             setProjectNameValue(e.target.value)
             setDirty(true)
@@ -44,7 +65,8 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
       <BasicItem>
         <b>Budget:</b>
         <Input
-          value={budget}
+          placeholder="Enter budget"
+          value={budgetValue}
           onChange={(e) => {
             setBudgetValue(e.target.value)
             setDirty(true)
@@ -54,8 +76,13 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
       </BasicItem>
       <BasicItem>
         <b>Category:</b>
-        <Input
-          value={categoryValue}
+        <Select
+          options={categoryOptions}
+          value={
+            categoryOptions.find((option) => option.value === categoryValue)?.value ??
+            categoryOptions[0].value
+          }
+          helperText="Select category"
           onChange={(e) => {
             setCategoryValue(e.target.value)
             setDirty(true)
@@ -67,8 +94,10 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
         <b>Options:</b>
         <CheckboxGroup
           label=""
-          options={checkboxOptions.map((option) => option.value)}
-          value={optionsValue}
+          options={checkboxOptions.map((option) => option.label)}
+          value={checkboxOptions
+            .filter((option) => optionsValue.includes(option.value))
+            .map((option) => option.value)}
           onChange={(next) => {
             setOptionsValue(next)
             setDirty(true)
@@ -77,20 +106,10 @@ export const ProjectDetails = (props: ProjectDetailsProps) => {
         />
       </BasicItem>
       <ActionButtonsContainer>
-        <Link to={`/resources/${resourceId}/details`}>
+        <Link to={`/resources/${activeResourceId}/details`}>
           <Button variant="ghost">Cancel</Button>
         </Link>
-        <Button
-          disabled={!dirty}
-          onClick={() =>
-            editProjectDetails(parseInt(resourceId ?? ''), {
-              projectName: projectNameValue,
-              budget: budgetValue,
-              category: categoryValue,
-              options: optionsValue,
-            })
-          }
-        >
+        <Button disabled={!dirty} onClick={handleSave}>
           Save
         </Button>
       </ActionButtonsContainer>

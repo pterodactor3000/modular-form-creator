@@ -1,13 +1,7 @@
 import type { ResourceProps } from '../../components/Resource'
-
-export type Pagination = {
-  page: number
-  pageSize: number
-  totalItems: number
-  totalPages: number
-}
+import type { PaginationProps } from '../../components/Pagination/Pagination.types'
 
 export type ResourcesList = {
   items: ResourceProps[]
-  pagination: Pagination
+  pagination: PaginationProps
 }
